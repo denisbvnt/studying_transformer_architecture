@@ -82,6 +82,7 @@ class MultiHeadAttentionBlock(nn.Module):
 
         self.w_o = nn.Linear(d_model, d_model) # Wo
         self.dropout = nn.Dropout(dropout)
+        self.attention_scores = None
 
     @staticmethod
     def attention(query, key, value, mask, dropout: nn.Dropout):
@@ -106,7 +107,7 @@ class MultiHeadAttentionBlock(nn.Module):
         key = key.view(key.shape[0], key.shape[1], self.heads, self.d_k).transpose(1, 2)
         value = value.view(value.shape[0], value.shape[1], self.heads, self.d_k).transpose(1, 2)
 
-        x, attention_score = MultiHeadAttentionBlock.attention(query, key, value, mask, self.dropout)
+        x, self.attention_scores = MultiHeadAttentionBlock.attention(query, key, value, mask, self.dropout)
         # (Batch, heads, Seq_len, d_k) --> (Batch, Seq_len, heads, d_k) --> (Batch, Seq_len, d_model)
         x = x.transpose(1, 2).contiguous().view(x.shape[0], -1, self.heads * self.d_k)
 
